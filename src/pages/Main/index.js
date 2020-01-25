@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Keyboard } from 'react-native';
+import { Keyboard, ToastAndroid } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import api from '../../services/api';
@@ -34,10 +34,9 @@ const Main = () => {
       setUsers([...users, data]);
       setNewUser('');
       Keyboard.dismiss();
-      console.tron.log(users);
     } catch (error) {
+      ToastAndroid.show('Usuário não encontrado', ToastAndroid.LONG);
       setNewUser('');
-      console.tron.log(error);
     }
   };
 
