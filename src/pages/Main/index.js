@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Keyboard, ToastAndroid } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Keyboard, ToastAndroid, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import api from '../../services/api';
@@ -16,14 +17,30 @@ import {
   Bio,
   ProfileButton,
   ProfileButtonText,
+  Remove,
 } from './styles';
 
 const Main = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [newUser, setNewUser] = useState('');
+
+  useEffect(() => {
+    AsyncStorage.getItem('users').then(data => {
+      if (data) setUsers(JSON.parse(data));
+    });
+  }, []);
+
+  useEffect(() => {
+    async function saveUsers() {
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+    }
+    saveUsers();
+  }, [users]);
 
   const handleAddUser = async () => {
     try {
+      setLoading(true);
       const response = await api.get(`/users/${newUser}`);
       const data = {
         name: response.data.name,
@@ -31,13 +48,21 @@ const Main = () => {
         bio: response.data.bio,
         avatar: response.data.avatar_url,
       };
-      setUsers([...users, data]);
+
+      const alreadyExist = users.find(user => user.login === data.login);
+      if (!alreadyExist) setUsers([...users, data]);
       setNewUser('');
+      setLoading(false);
       Keyboard.dismiss();
     } catch (error) {
       ToastAndroid.show('Usuário não encontrado', ToastAndroid.LONG);
+      setLoading(false);
       setNewUser('');
     }
+  };
+
+  const removeHandler = login => {
+    setUsers(users.filter(user => user.login !== login));
   };
 
   return (
@@ -52,8 +77,12 @@ const Main = () => {
           returnKeyType="send"
           onSubmitEditing={handleAddUser}
         />
-        <SubmitButton onPress={handleAddUser}>
-          <Icon name="add" size={20} color="#FFF" />
+        <SubmitButton loading={loading} onPress={handleAddUser}>
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Icon name="add" size={20} color="#FFF" />
+          )}
         </SubmitButton>
       </Form>
       <List
@@ -61,6 +90,14 @@ const Main = () => {
         keyExtractor={user => user.login}
         renderItem={({ item }) => (
           <User>
+            <Remove>
+              <Icon
+                name="close"
+                size={20}
+                color="#fc0303"
+                onPress={() => removeHandler(item.login)}
+              />
+            </Remove>
             <Avatar source={{ uri: item.avatar }} />
             <Name>{item.name}</Name>
             <Bio>{item.bio || 'Sem bio'}</Bio>
