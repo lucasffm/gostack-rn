@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Keyboard, ToastAndroid, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -20,7 +21,7 @@ import {
   Remove,
 } from './styles';
 
-const Main = () => {
+const Main = ({ navigation }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newUser, setNewUser] = useState('');
@@ -65,6 +66,10 @@ const Main = () => {
     setUsers(users.filter(user => user.login !== login));
   };
 
+  const handleNavite = user => {
+    navigation.navigate('User', { user });
+  };
+
   return (
     <Container>
       <Form>
@@ -101,7 +106,7 @@ const Main = () => {
             <Avatar source={{ uri: item.avatar }} />
             <Name>{item.name}</Name>
             <Bio>{item.bio || 'Sem bio'}</Bio>
-            <ProfileButton onPress={() => {}}>
+            <ProfileButton onPress={() => handleNavite(item)}>
               <ProfileButtonText>Ver Perfil</ProfileButtonText>
             </ProfileButton>
           </User>
@@ -113,6 +118,12 @@ const Main = () => {
 
 Main.navigationOptions = {
   title: 'Usuários',
+};
+
+Main.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func,
+  }).isRequired,
 };
 
 export default Main;
