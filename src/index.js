@@ -1,7 +1,8 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text, StatusBar } from 'react-native';
-
+import { StyleSheet } from 'react-native';
 import './config/ReactotronConfig';
+
+import Routes from './routes';
 
 const styles = StyleSheet.create({
   container: {
@@ -18,15 +19,7 @@ const styles = StyleSheet.create({
 });
 
 const App = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.welcome}>Olá Mundo</Text>
-        <Text style={styles.welcome}>Abaixo</Text>
-      </SafeAreaView>
-    </>
-  );
+  return <Routes />;
 };
 
 export default App;
